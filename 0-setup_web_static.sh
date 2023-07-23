@@ -51,7 +51,7 @@ HOME_PAGE="<!DOCTYPE html>
 
 mkdir -p /var/www/html /var/www/error
 chmod -R 755 /var/www
-echo 'Hello World!' > /var/www/html/index.html
+echo 'Hello HBNB!' > /var/www/html/index.html
 echo -e "Ceci n\x27est pas une page" > /var/www/error/404.html
 
 # Create the folder /data/ if it doesn’t already exist
@@ -73,7 +73,7 @@ ln -sf /data/web_static/releases/test/ /data/web_static/current
 
 # Give ownership of the /data/ folder to the ubuntu user AND group (you can assume this user and group exist).
 # This should be recursive; everything inside should be created/owned by this user/group.
-chown -hR ubuntu:ubuntu /data
+chown -hR root@8e55f2241fb5 /data
 
 # Update the Nginx configuration to serve the content of /data/web_static/current/ to hbnb_static
 # (ex: https://mydomainname.tech/hbnb_static). Don’t forget to restart Nginx after updating the configuration:

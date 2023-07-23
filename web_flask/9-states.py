@@ -1,37 +1,50 @@
 #!/usr/bin/python3
-"""script that starts a Flask web application"""
-
-
-# import Flask class from flask module
-# import render_template for rendering templates to browser
-# fetch data from storage engine
+'''A simple Flask web application.
+'''
 from flask import Flask, render_template
 
 from models import storage
+from models.state import State
 
-# create an instance called app of the class by passong the __name__ variable
+
 app = Flask(__name__)
+'''The Flask application instance.'''
 app.url_map.strict_slashes = False
 
 
-@app.teardown_appcontext
-def teardown_db(exception=None):
-    """removes the current SQLAlchemy Session
-    """
-    if storage is not None:
-        storage.close()
-
-
 @app.route('/states')
-@app.route('/states/<state_id>')
-def states(state_id=None):
-    """displays a HTML page: inside the tag BODY"""
-    states = storage.all("State")
-    if state_id is None:
-        return render_template('9-states.html', states=states)
-    state = states.get('State.{}'.format(state_id))
-    return render_template('9-states.html', state=state)
+@app.route('/states/<id>')
+def states(id=None):
+    '''The states page.'''
+    states = None
+    state = None
+    all_states = list(storage.all(State).values())
+    case = 404
+    if id is not None:
+        res = list(filter(lambda x: x.id == id, all_states))
+        if len(res) > 0:
+            state = res[0]
+            state.cities.sort(key=lambda x: x.name)
+            case = 2
+    else:
+        states = all_states
+        for state in states:
+            state.cities.sort(key=lambda x: x.name)
+        states.sort(key=lambda x: x.name)
+        case = 1
+    ctxt = {
+        'states': states,
+        'state': state,
+        'case': case
+    }
+    return render_template('9-states.html', **ctxt)
+
+
+@app.teardown_appcontext
+def flask_teardown(exc):
+    '''The Flask app/request context end event listener.'''
+    storage.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port='5000')

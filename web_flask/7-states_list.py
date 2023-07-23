@@ -1,33 +1,33 @@
 #!/usr/bin/python3
-"""script that starts a Flask web application"""
-
-
-# import Flask class from flask module
-# import render_template for rendering templates to browser
-# fetch data from storage engine
+'''A simple Flask web application.
+'''
 from flask import Flask, render_template
 
 from models import storage
+from models.state import State
 
-# create an instance called app of the class by passong the __name__ variable
+
 app = Flask(__name__)
+'''The Flask application instance.'''
 app.url_map.strict_slashes = False
 
 
-@app.teardown_appcontext
-def teardown_db(exception=None):
-    """removes the current SQLAlchemy Session
-    """
-    if storage is not None:
-        storage.close()
-
-
 @app.route('/states_list')
-def states_list(n=None):
-    """displays a HTML page: inside the tag BODY"""
-    states = storage.all('State')
-    return render_template('7-states_list.html', states=states)
+def states_list():
+    '''The states_list page.'''
+    all_states = list(storage.all(State).values())
+    all_states.sort(key=lambda x: x.name)
+    ctxt = {
+        'states': all_states
+    }
+    return render_template('7-states_list.html', **ctxt)
+
+
+@app.teardown_appcontext
+def flask_teardown(exc):
+    '''The Flask app/request context end event listener.'''
+    storage.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port='5000')
